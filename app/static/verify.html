@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Email verification</title>
+</head>
+
+<body>
+    <script type="text/javascript">
+        const apiUrl = 'https://example.com/users/verify';
+
+        const params = new Proxy(new URLSearchParams(window.location.search), {
+            get: (searchParams, prop) => searchParams.get(prop),
+        });
+
+        var token = params.token;
+        if (!token) {
+            document.write('Token query missing');
+            throw new Error('Token query missing');
+        }
+
+        fetch(`${apiUrl}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 'token': token })
+        }).then(response => {
+            if (response.status == 200)
+                document.write('Verified email successfully');
+            else
+                document.write('Failed to verify email');
+        }).catch(err => {
+            document.write('Failed to communicate with server');
+        });
+    </script>
+</body>
+
+</html>

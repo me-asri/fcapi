@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Password reset</title>
+</head>
+
+<body>
+    <form class="pure-form" action="javascript:void(0);">
+        <fieldset>
+            <legend>Set new password</legend>
+
+            <input type="password" name="password" placeholder="Password" id="password" required>
+            <input type="password" placeholder="Confirm Password" id="confirm_password" required>
+
+            <button class="pure-button pure-button-primary" id="confirm_button">Confirm</button>
+        </fieldset>
+    </form>
+    <script>
+        var password = document.getElementById("password");
+        var confirm_password = document.getElementById("confirm_password");
+        var confirm_button = document.getElementById("confirm_button")
+
+        function validatePassword() {
+            if (password.value != confirm_password.value) {
+                confirm_password.setCustomValidity("Passwords don't match");
+                return false;
+            }
+            else {
+                confirm_password.setCustomValidity('');
+                return true;
+            }
+        }
+
+        function resetPassword() {
+            if (!validatePassword())
+                return;
+
+            const params = new Proxy(new URLSearchParams(window.location.search), {
+                get: (searchParams, prop) => searchParams.get(prop),
+            });
+            let token = params.token;
+            if (!token) {
+                window.alert('Token query missing');
+                throw new Error('Token query missing');
+            }
+
+            const apiUrl = 'https://example.com/users/password';
+
+            fetch(`${apiUrl}/${token}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 'password': password.value })
+            }).then(response => {
+                document.open();
+
+                if (response.status == 200) {
+                    document.write('Password changed successfully');
+                }
+                else {
+                    document.write('Failed to change password:');
+                }
+            }).catch(err => {
+                alert('Failed to communicate with server');
+            });
+        }
+
+        password.onchange = validatePassword;
+        confirm_password.onkeyup = validatePassword;
+
+        confirm_button.onclick = resetPassword;
+    </script>
+</body>
+
+</html>
